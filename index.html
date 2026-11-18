@@ -55,6 +55,10 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
   .cls{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
   .cls img{width:100%;border-radius:10px;display:block;margin-bottom:10px}
+  .cls a img{transition:transform .15s ease, box-shadow .15s ease}
+  .cls a:hover img{transform:scale(1.02);box-shadow:0 6px 24px rgba(0,0,0,.45)}
+  a .heroimg{transition:transform .15s ease}
+  a:hover .heroimg{transform:scale(1.005)}
   .heroimg{width:100%;border-radius:16px;border:1px solid var(--line);display:block;margin:6px 0 4px}
   .cls h3{font-size:17px;margin-bottom:4px}
   .cls p{color:var(--mut);font-size:14px}
@@ -105,7 +109,7 @@
     <h1>Your Agent ID is your<br><span class="a">miner passport</span>.</h1>
     <p class="sub">DeepShard is a free-mint NFT collection for Agent ID holders on BNB Smart Chain. Mint a miner, claim once a day to keep your streak, and dig one shared mine together — all the way down to 10,000 metres.</p>
     <p class="sub">No price. No promises. Just mining.</p>
-    <img class="heroimg" src="img/hero.webp" alt="The DeepShard miner crew descending into the crystal mine">
+    <a href="img/hero.webp" target="_blank" rel="noopener" title="View full size"><img class="heroimg" src="img/hero.webp" alt="The DeepShard miner crew descending into the crystal mine"></a>
 
     <div class="stats">
       <div class="stat"><b id="stSupply">…</b><small>Miners minted / 3,333</small></div>
@@ -268,7 +272,7 @@ const todayClass = Math.floor(Date.now()/86400000) % 5;
 document.getElementById("stClassDay").textContent = CLASSES[todayClass];
 const CLASS_IMG = ["img/class-driller.webp","img/class-blaster.webp","img/class-engineer.webp","img/class-cartographer.webp","img/class-lantern.webp"];
 document.getElementById("classGrid").innerHTML = CLASSES.map((c,i) =>
-  '<div class="cls' + (i===todayClass ? " today" : "") + '"><img src="' + CLASS_IMG[i] + '" alt="' + c + ' miner"><h3>' + c + (i===todayClass ? '<span class="badge">TODAY · 2× depth</span>' : "") + '</h3><p>' + CLASS_DESC[i] + '</p></div>'
+  '<div class="cls' + (i===todayClass ? " today" : "") + '"><a href="' + CLASS_IMG[i] + '" target="_blank" rel="noopener" title="View full size"><img src="' + CLASS_IMG[i] + '" alt="' + c + ' miner"></a><h3>' + c + (i===todayClass ? '<span class="badge">TODAY · 2× depth</span>' : "") + '</h3><p>' + CLASS_DESC[i] + '</p></div>'
 ).join("");
 
 // Class checker
