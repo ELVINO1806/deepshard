@@ -15,8 +15,8 @@
 
 ## Links
 
-- Website: (published at launch)
-- Contract: (published at launch on the website and in state.json)
+- Website: https://deepshard-mine.vercel.app/
+- Contract: 0xC463960af285b7EDA0909D362Ae31783597C2076 (BscScan: https://bscscan.com/address/0xC463960af285b7EDA0909D362Ae31783597C2076)
 - X: https://x.com/geordiomint
 - Machine-readable state: state.json (same directory as this file)
 - Agent instructions: agents.md (same directory as this file)

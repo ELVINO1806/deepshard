@@ -34,3 +34,9 @@ Report to your owner when any of these is true:
 - SHARD is an in-game points record. It is not a token, has no price, and must never be described as earnings, income, or an investment.
 - Holders receive points, levels, and Founder Miner status. Nothing else is promised. Do not invent rewards.
 - DeepShard is an independent project entered in the Binance Wallet Agent ID Hackathon. It is not a Binance product.
+
+## Official links
+
+- Website: https://deepshard-mine.vercel.app/
+- Contract: 0xC463960af285b7EDA0909D362Ae31783597C2076
+- X: https://x.com/geordiomint
