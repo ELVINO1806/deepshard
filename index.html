@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepShard — The First Descent | Free-Mint NFT Miners for Agent ID Holders</title>
+<meta name="description" content="DeepShard is a free-mint NFT collection for Agent ID holders on BNB Smart Chain. Mint a miner, claim daily, build a streak, and dig the shared mine to 10,000 m. SHARD is an in-game points record, not a token.">
+<style>
+  :root{
+    --bg:#0b0e14; --bg2:#10141f; --card:#141926; --line:#232b3f;
+    --ink:#e8ecf4; --mut:#97a1b5; --amber:#f5b942; --amber2:#ffcf6e;
+    --teal:#39d0c4; --red:#ff6b6b; --green:#4ade80;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+  a{color:var(--amber);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{border-bottom:1px solid var(--line);background:var(--bg2);position:sticky;top:0;z-index:10}
+  .hbar{display:flex;align-items:center;gap:14px;padding:12px 0;flex-wrap:wrap}
+  .logo{font-weight:800;font-size:20px;letter-spacing:.3px}
+  .logo span{color:var(--amber)}
+  .chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--mut)}
+  .chip.open{color:#0b0e14;background:var(--green);border-color:var(--green);font-weight:700}
+  .hbar .sp{flex:1}
+  .addr{font-size:12px;color:var(--mut);font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+  .hero{padding:52px 0 30px;text-align:center}
+  .hero h1{font-size:44px;line-height:1.15;margin-bottom:12px}
+  .hero h1 .a{color:var(--amber)}
+  .hero p.sub{color:var(--mut);max-width:640px;margin:0 auto 8px}
+  .season{color:var(--amber2);font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:13px;margin-bottom:14px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:30px 0 8px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 10px}
+  .stat b{display:block;font-size:26px;color:var(--amber2)}
+  .stat small{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+  .depthbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0 6px;text-align:left}
+  .depthbox .row{display:flex;justify-content:space-between;font-size:14px;color:var(--mut);margin-bottom:8px}
+  .depthbox .row b{color:var(--ink)}
+  .bar{height:14px;background:#0a0d13;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--amber2));width:0%}
+  .miles{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-top:6px;flex-wrap:wrap;gap:4px}
+  .cta{display:flex;gap:12px;justify-content:center;margin:26px 0 6px;flex-wrap:wrap}
+  button{cursor:pointer;border:none;border-radius:12px;padding:14px 28px;font-size:16px;font-weight:700}
+  .btn-mint{background:var(--amber);color:#191203}
+  .btn-mint:hover{background:var(--amber2)}
+  .btn-claim{background:transparent;color:var(--teal);border:1px solid var(--teal)}
+  .btn-wallet{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .fine{font-size:13px;color:var(--mut);text-align:center}
+  .status-line{min-height:22px;text-align:center;font-size:14px;color:var(--amber2);margin-top:8px}
+  section{padding:34px 0 6px}
+  h2{font-size:26px;margin-bottom:6px}
+  h2 .a{color:var(--amber)}
+  .lead{color:var(--mut);margin-bottom:18px;max-width:720px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+  .cls{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .cls h3{font-size:17px;margin-bottom:4px}
+  .cls p{color:var(--mut);font-size:14px}
+  .cls.today{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+  .badge{display:inline-block;font-size:11px;background:var(--amber);color:#191203;border-radius:6px;padding:2px 7px;font-weight:700;margin-left:6px;vertical-align:middle}
+  .checker{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+  .checker input{background:#0a0d13;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 14px;font-size:15px;width:min(320px,100%)}
+  .checker button{padding:11px 20px;font-size:15px;margin-left:8px}
+  .checker .res{margin-top:10px;font-size:15px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .step b{color:var(--amber2)}
+  .step p{color:var(--mut);font-size:14px;margin-top:4px}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th,td{padding:10px 14px;text-align:left;font-size:14px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);text-transform:uppercase;font-size:12px;letter-spacing:1px}
+  tr:last-child td{border-bottom:none}
+  .log{background:#0a0d13;border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:14px;max-height:300px;overflow:auto}
+  .log div{padding:3px 0;color:var(--mut)}
+  .log b{color:var(--ink)}
+  .safe{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+  .safe div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px}
+  .ok{color:var(--green);font-weight:700}
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  summary{cursor:pointer;font-weight:700}
+  details p{color:var(--mut);margin-top:8px;font-size:15px}
+  .files{display:flex;gap:10px;flex-wrap:wrap}
+  .files a{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-family:ui-monospace,Menlo,monospace;font-size:14px}
+  footer{border-top:1px solid var(--line);margin-top:44px;padding:26px 0 40px;color:var(--mut);font-size:13px}
+  footer .row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:32px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hbar">
+    <div class="logo">Deep<span>Shard</span> ⛏</div>
+    <span class="chip">Season 1 · The First Descent</span>
+    <span class="chip open" id="mintState">Mint open</span>
+    <div class="sp"></div>
+    <span class="addr">Contract: <a href="https://bscscan.com/address/0xC463960af285b7EDA0909D362Ae31783597C2076" target="_blank" rel="noopener">0xC463960af285b7EDA0909D362Ae31783597C2076</a></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="season">Season 1 · The First Descent</div>
+    <h1>Your Agent ID is your<br><span class="a">miner passport</span>.</h1>
+    <p class="sub">DeepShard is a free-mint NFT collection for Agent ID holders on BNB Smart Chain. Mint a miner, claim once a day to keep your streak, and dig one shared mine together — all the way down to 10,000 metres.</p>
+    <p class="sub">No price. No promises. Just mining.</p>
+
+    <div class="stats">
+      <div class="stat"><b id="stSupply">…</b><small>Miners minted / 3,333</small></div>
+      <div class="stat"><b id="stMiners">…</b><small>Unique miners</small></div>
+      <div class="stat"><b id="stDepth">…</b><small>Metres dug together</small></div>
+      <div class="stat"><b id="stClassDay">…</b><small>Class of the day (2× depth)</small></div>
+    </div>
+
+    <div class="depthbox">
+      <div class="row"><span>Collective Depth Meter</span><b><span id="depthNow">…</span> / 10,000 m</b></div>
+      <div class="bar"><i id="depthBar"></i></div>
+      <div class="miles"><span>100 m · Topsoil</span><span>500 m · Clay Belt</span><span>1,000 m · Old Tunnels</span><span>2,500 m · Crystal Field</span><span>5,000 m · Magma Shelf</span><span>10,000 m · Rainbow Core</span></div>
+    </div>
+
+    <div class="cta">
+      <button class="btn-wallet" id="btnConnect">Connect wallet</button>
+      <button class="btn-mint" id="btnMint" disabled>Mint my miner — free</button>
+      <button class="btn-claim" id="btnClaim" disabled>Daily claim</button>
+    </div>
+    <div class="fine" id="myStatus">Free mint · Agent ID holders only · Max 2 per wallet · You pay only the network gas fee, paid to the chain — never to this project.</div>
+    <div class="status-line" id="txStatus"></div>
+  </div>
+
+  <section>
+    <h2>Five classes, <span class="a">one passport</span></h2>
+    <p class="lead">Your miner class is not chosen and cannot be re-rolled. It is derived from your Agent ID handle itself — the same rule runs in the contract and in the checker below. One class digs double depth each day, rotating daily.</p>
+    <div class="grid" id="classGrid"></div>
+    <div class="checker">
+      <b>Check your class before you mint</b>
+      <div style="margin-top:10px">
+        <input id="handleInput" placeholder="your Agent ID handle, e.g. elvinojr" autocomplete="off">
+        <button class="btn-mint" id="btnCheck">Check</button>
+      </div>
+      <div class="res" id="checkRes"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How mining <span class="a">works</span></h2>
+    <p class="lead">Mining is time-based. Your miner earns SHARD while time passes; one claim a day settles it. No hardware, no proof-of-work, nothing running on your machine.</p>
+    <div class="steps">
+      <div class="step"><b>1 · Mint free</b><p>Hold an Agent ID, connect your wallet, mint. Max 2 miners per wallet, 3,333 total — locked in code.</p></div>
+      <div class="step"><b>2 · Claim daily</b><p>First claim starts your clock. After that, claim once a day (20-hour cooldown). Each claim also digs +4 m into the shared depth — +8 m on your class day.</p></div>
+      <div class="step"><b>3 · Keep the streak</b><p>You have a 48-hour grace window. Streaks multiply SHARD: day 3 ×1.1, day 7 ×1.25, day 14 ×1.5, day 30 ×2.0.</p></div>
+      <div class="step"><b>4 · Level up</b><p>Lifetime SHARD raises your level, from Lv 1 to Lv 10. Levels never decrease. SHARD itself never burns and is never taken away.</p></div>
+    </div>
+    <p class="lead" style="margin-top:16px"><b style="color:var(--ink)">What SHARD is — and is not.</b> SHARD is an in-game points record kept inside the contract. It is <b style="color:var(--ink)">not a token</b>: it cannot be transferred, has no price, and is never promised to become one. Holders receive SHARD points, levels, and Founder Miner status. Nothing else is promised, by design.</p>
+  </section>
+
+  <section>
+    <h2>The crew <span class="a">so far</span></h2>
+    <p class="lead">Every miner below minted through the same public gate — no whitelist, no invite, no special access. Read live from the contract.</p>
+    <table>
+      <thead><tr><th>Handle</th><th>Class</th><th>Miners</th><th>SHARD</th><th>Level</th><th>Streak</th></tr></thead>
+      <tbody id="crewBody"><tr><td colspan="6" style="color:var(--mut)">Loading from chain…</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Expedition <span class="a">log</span></h2>
+    <p class="lead">The mine diary. Every mint and every daily claim, written from on-chain events — nothing here is typed by hand.</p>
+    <div class="log" id="expLog"><div>Loading from chain…</div></div>
+  </section>
+
+  <section>
+    <h2>Safety <span class="a">proof</span></h2>
+    <p class="lead">Do not trust this page. Verify the contract yourself — everything below is checkable in the public source.</p>
+    <div class="safe">
+      <div><span class="ok">✓</span> Mint price is exactly 0 — the mint function is not payable; sending BNB to it fails.</div>
+      <div><span class="ok">✓</span> Source verified with an exact match on <a href="https://sourcify.dev" target="_blank" rel="noopener">Sourcify</a> — what you read is what runs.</div>
+      <div><span class="ok">✓</span> No owner, no admin functions, no upgrade proxy. Nobody can change the rules after deploy.</div>
+      <div><span class="ok">✓</span> No withdraw function. The contract never holds user funds.</div>
+      <div><span class="ok">✓</span> Supply hard-locked at 3,333 and max 2 per wallet, in code constants.</div>
+      <div><span class="ok">✓</span> The contract never requests ERC-20 approvals or setApprovalForAll from you.</div>
+      <div><span class="ok">✓</span> Minting and claiming are gated by the official Agent ID registry (0x60B9…022F), checked on-chain.</div>
+      <div><span class="ok">✓</span> This site is static and open. It never asks for a seed phrase, private key, or password.</div>
+    </div>
+    <p class="lead" style="margin-top:12px">Read the source: <a href="https://bscscan.com/address/0xC463960af285b7EDA0909D362Ae31783597C2076#code" target="_blank" rel="noopener">BscScan</a> · <a href="https://repo.sourcify.dev/contracts/full_match/56/0xC463960af285b7EDA0909D362Ae31783597C2076/" target="_blank" rel="noopener">Sourcify repository</a></p>
+  </section>
+
+  <section>
+    <h2>Built for <span class="a">agents</span></h2>
+    <p class="lead">Agents are first-class citizens here. These files describe the project in machine-readable form, with the same facts a human reads above — contract address, gate, price, and safety properties.</p>
+    <div class="files">
+      <a href="llms.txt">llms.txt</a>
+      <a href="agents.md">agents.md</a>
+      <a href="state.json">state.json</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Questions</h2>
+    <details><summary>Who can mint?</summary><p>Any wallet that holds an Agent ID. The contract checks the official SPACE ID Agent ID registry on-chain: registry balance above zero, a non-empty handle, and the handle resolving back to your wallet. There is no social requirement — no follow, like, or repost is needed to mint.</p></details>
+    <details><summary>What does it cost?</summary><p>The mint itself is free (price 0). You pay only the BNB Smart Chain network gas fee for your transaction, which goes to the chain — the project receives nothing from minters.</p></details>
+    <details><summary>What do holders receive?</summary><p>SHARD points, levels, and Founder Miner status for Season 1. SHARD is an in-game points record, not a token: it is non-transferable, has no price, and is never promised to become one. No airdrop or monetary reward is promised.</p></details>
+    <details><summary>What is the Agent ID Hackathon?</summary><p>DeepShard is an independent entry in the Agent ID Hackathon (Binance Wallet × BNB Chain), where it competes for the builders' Innovation Award pool of 29,000 USDC. That pool is a prize for builders, decided by the organizers — it is not a prize for minters, and no part of it is promised to holders.</p></details>
+    <details><summary>When does Season 1 end?</summary><p>Season 1, The First Descent, is open now. Minting runs until the 3,333 supply is gone, and daily claiming continues after that. The shared goal is the 10,000 m depth target — reached together, whenever the crew gets there.</p></details>
+    <details><summary>Can I lose my SHARD or my streak?</summary><p>SHARD never decreases and is never burned. A streak resets only if you miss more than the 48-hour grace window between claims — and even then, your SHARD and level stay exactly where they were.</p></details>
+  </section>
+
+  <footer>
+    <div class="row">
+      <div class="logo" style="font-size:16px">Deep<span>Shard</span> ⛏</div>
+      <a href="https://x.com/geordiomint" target="_blank" rel="noopener">Follow us</a>
+      <a href="https://bscscan.com/address/0xC463960af285b7EDA0909D362Ae31783597C2076" target="_blank" rel="noopener">Contract on BscScan</a>
+      <span>Independent entry in the Agent ID Hackathon (Binance Wallet × BNB Chain). Not affiliated with or endorsed by Binance.</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+const CONTRACT = "0xC463960af285b7EDA0909D362Ae31783597C2076";
+const REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
+const RPC = "https://bsc-dataseed.binance.org";
+const DEPLOY_BLOCK = 134351890;
+const CLASSES = ["Driller","Blaster","Engineer","Cartographer","Lantern Keeper"];
+const CLASS_DESC = [
+  "Breaks the front line. First into every new layer.",
+  "Clears the hard rock so the crew can pass.",
+  "Keeps the tunnels standing and the carts rolling.",
+  "Maps the dark. Finds the veins nobody else sees.",
+  "Carries the light. The crew follows the lantern."
+];
+const SEL = {
+  totalSupply:"0x18160ddd", totalDepth:"0xef90c53d", mintOpen:"0x24bbd049",
+  balanceOf:"0x70a08231", shardOf:"0xf01d24e8", streakOf:"0x4fc1854a",
+  levelOf:"0x5c138c9d", pendingOf:"0xf44136a1", mintedBy:"0x3cef28d2",
+  handleOf:"0xc50a1514", classOf:"0xeac9587f",
+  mint:"0x1249c58b", claim:"0x4e71d92d"
+};
+const TOPIC_MINTED = "0x25b428dfde728ccfaddad7e29e4ac23c24ed7fd1a6e3e3f91894a9a073f5dfff";
+const TOPIC_CLAIMED = "0x7708755c9b641bf197be5047b04002d2e88fa658c173a351067747eb5dfc568a";
+
+let rpcId = 0;
+async function rpc(method, params){
+  const r = await fetch(RPC, {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({jsonrpc:"2.0", id:++rpcId, method, params})});
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
+function encAddr(a){ return "000000000000000000000000" + a.replace("0x","").toLowerCase(); }
+async function call(to, data){ return rpc("eth_call", [{to, data}, "latest"]); }
+function u256(hex){ return parseInt(hex, 16); }
+function decodeString(hex){
+  const h = hex.replace("0x","");
+  const len = parseInt(h.slice(64,128), 16);
+  const bytes = h.slice(128, 128 + len*2);
+  let s = "";
+  for (let i=0;i<bytes.length;i+=2) s += String.fromCharCode(parseInt(bytes.slice(i,i+2),16));
+  return s;
+}
+function classFromHandle(handle){
+  let x = 0;
+  for (let i=0;i<handle.length;i++) x = x*31 + handle.charCodeAt(i);
+  return x % 5;
+}
+function esc(s){ return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// Class grid + class of the day
+const todayClass = Math.floor(Date.now()/86400000) % 5;
+document.getElementById("stClassDay").textContent = CLASSES[todayClass];
+document.getElementById("classGrid").innerHTML = CLASSES.map((c,i) =>
+  '<div class="cls' + (i===todayClass ? " today" : "") + '"><h3>' + c + (i===todayClass ? '<span class="badge">TODAY · 2× depth</span>' : "") + '</h3><p>' + CLASS_DESC[i] + '</p></div>'
+).join("");
+
+// Class checker
+document.getElementById("btnCheck").onclick = () => {
+  let h = document.getElementById("handleInput").value.trim().toLowerCase();
+  if (h.endsWith(".ai")) h = h.slice(0,-3);
+  const out = document.getElementById("checkRes");
+  if (!h) { out.textContent = "Type your Agent ID handle first."; return; }
+  const c = classFromHandle(h);
+  out.innerHTML = "<b>" + esc(h) + ".ai</b> digs as a <b>" + CLASSES[c] + "</b>" + (c===todayClass ? " — and today is your class day: double depth on every claim." : ".");
+};
+
+// Live chain data
+async function loadChain(){
+  try {
+    const [sup, dep, open] = await Promise.all([
+      call(CONTRACT, SEL.totalSupply), call(CONTRACT, SEL.totalDepth), call(CONTRACT, SEL.mintOpen)
+    ]);
+    const supply = u256(sup), depth = u256(dep);
+    document.getElementById("stSupply").textContent = supply.toLocaleString();
+    document.getElementById("depthNow").textContent = depth.toLocaleString();
+    document.getElementById("depthBar").style.width = Math.min(100, depth/100) + "%";
+    if (u256(open) === 0) {
+      document.getElementById("mintState").textContent = "Sold out";
+      document.getElementById("btnMint").disabled = true;
+    }
+    const fromHex = "0x" + DEPLOY_BLOCK.toString(16);
+    const [mintLogs, claimLogs] = await Promise.all([
+      rpc("eth_getLogs", [{address: CONTRACT, topics:[TOPIC_MINTED], fromBlock: fromHex, toBlock: "latest"}]),
+      rpc("eth_getLogs", [{address: CONTRACT, topics:[TOPIC_CLAIMED], fromBlock: fromHex, toBlock: "latest"}])
+    ]);
+    const minters = new Map();
+    for (const lg of mintLogs) {
+      const w = "0x" + lg.topics[1].slice(26);
+      minters.set(w, (minters.get(w) || 0) + 1);
+    }
+    document.getElementById("stMiners").textContent = minters.size;
+    // Crew table
+    const rows = [];
+    for (const [w, count] of minters) {
+      try {
+        const [hHex, cHex, sHex, lHex, stHex] = await Promise.all([
+          call(REGISTRY, SEL.handleOf + encAddr(w)),
+          call(CONTRACT, SEL.classOf + encAddr(w)),
+          call(CONTRACT, SEL.shardOf + encAddr(w)),
+          call(CONTRACT, SEL.levelOf + encAddr(w)),
+          call(CONTRACT, SEL.streakOf + encAddr(w))
+        ]);
+        rows.push({handle: decodeString(hHex), cls: u256(cHex), count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
+      } catch(e) { /* skip a row rather than break the table */ }
+    }
+    rows.sort((a,b) => b.shard - a.shard || b.count - a.count);
+    document.getElementById("crewBody").innerHTML = rows.length
+      ? rows.map(r => "<tr><td><b>" + esc(r.handle) + "</b>.ai</td><td>" + CLASSES[r.cls] + "</td><td>" + r.count + "</td><td>" + r.shard.toLocaleString() + "</td><td>Lv " + r.level + "</td><td>" + r.streak + " day" + (r.streak===1?"":"s") + "</td></tr>").join("")
+      : '<tr><td colspan="6" style="color:var(--mut)">No miners yet.</td></tr>';
+    // Expedition log
+    const events = [];
+    for (const lg of mintLogs) events.push({block: u256(lg.blockNumber), kind:"mint", log: lg});
+    for (const lg of claimLogs) events.push({block: u256(lg.blockNumber), kind:"claim", log: lg});
+    events.sort((a,b) => b.block - a.block);
+    const handleCache = new Map();
+    async function handleOf(w){
+      if (!handleCache.has(w)) {
+        try { handleCache.set(w, decodeString(await call(REGISTRY, SEL.handleOf + encAddr(w)))); }
+        catch(e) { handleCache.set(w, w.slice(0,6) + "…" + w.slice(-4)); }
+      }
+      return handleCache.get(w);
+    }
+    const lines = [];
+    for (const ev of events.slice(0, 30)) {
+      const w = "0x" + ev.log.topics[1].slice(26);
+      const h = await handleOf(w);
+      if (ev.kind === "mint") {
+        const tokenId = parseInt(ev.log.topics[2], 16);
+        lines.push("<div>⛏ <b>" + esc(h) + "</b>.ai joined the descent — Miner #" + String(tokenId).padStart(4,"0") + " minted.</div>");
+      } else {
+        const d = ev.log.data.replace("0x","");
+        const gained = parseInt(d.slice(0,64),16), streak = parseInt(d.slice(64,128),16), total = parseInt(d.slice(192,256),16);
+        lines.push("<div>🔦 <b>" + esc(h) + "</b>.ai claimed +" + gained + " SHARD · streak day " + streak + " · depth now " + total.toLocaleString() + " m.</div>");
+      }
+    }
+    document.getElementById("expLog").innerHTML = lines.length ? lines.join("") : "<div>No expeditions yet. The first lantern is lit.</div>";
+  } catch(e) {
+    document.getElementById("expLog").innerHTML = "<div>Could not reach the chain just now. The mine is still there — refresh in a moment.</div>";
+  }
+}
+loadChain();
+
+// Wallet actions (injected provider, e.g. Binance Wallet / MetaMask in-app browser)
+let account = null;
+const btnConnect = document.getElementById("btnConnect");
+const btnMint = document.getElementById("btnMint");
+const btnClaim = document.getElementById("btnClaim");
+const txStatus = document.getElementById("txStatus");
+const myStatus = document.getElementById("myStatus");
+function setStatus(t){ txStatus.textContent = t; }
+
+async function refreshMine(){
+  if (!account) return;
+  try {
+    const [bal, minted, shard, streak, level, pending] = await Promise.all([
+      call(CONTRACT, SEL.balanceOf + encAddr(account)),
+      call(CONTRACT, SEL.mintedBy + encAddr(account)),
+      call(CONTRACT, SEL.shardOf + encAddr(account)),
+      call(CONTRACT, SEL.streakOf + encAddr(account)),
+      call(CONTRACT, SEL.levelOf + encAddr(account)),
+      call(CONTRACT, SEL.pendingOf + encAddr(account))
+    ]);
+    const b = u256(bal), m = u256(minted);
+    btnMint.disabled = m >= 2;
+    btnClaim.disabled = b === 0;
+    myStatus.textContent = "Connected: " + account.slice(0,6) + "…" + account.slice(-4) +
+      " · You hold " + b + " miner" + (b===1?"":"s") + " (minted " + m + "/2)" +
+      " · SHARD " + u256(shard).toLocaleString() + " · Lv " + u256(level) + " · Streak " + u256(streak) +
+      " · Pending ≈ " + u256(pending) + " SHARD";
+  } catch(e) { /* reads will retry on next action */ }
+}
+
+btnConnect.onclick = async () => {
+  if (!window.ethereum) { setStatus("No wallet found in this browser. Open this page inside your wallet app's browser, or use a wallet extension."); return; }
+  try {
+    const accs = await window.ethereum.request({method:"eth_requestAccounts"});
+    account = accs[0];
+    const chain = await window.ethereum.request({method:"eth_chainId"});
+    if (chain !== "0x38") {
+      await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:"0x38"}]});
+    }
+    btnConnect.textContent = "Connected ✓";
+    await refreshMine();
+  } catch(e) { setStatus("Connection cancelled or failed."); }
+};
+
+async function sendTx(data, label){
+  if (!account) { setStatus("Connect your wallet first."); return; }
+  try {
+    setStatus(label + " — confirm in your wallet…");
+    const tx = await window.ethereum.request({method:"eth_sendTransaction",
+      params:[{from: account, to: CONTRACT, data, value: "0x0"}]});
+    setStatus(label + " sent: " + tx.slice(0,18) + "… waiting for the chain.");
+    let done = false;
+    for (let i=0;i<30 && !done;i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      const rc = await rpc("eth_getTransactionReceipt", [tx]);
+      if (rc) { done = true; setStatus(rc.status === "0x1" ? label + " confirmed ✓" : label + " failed on-chain."); }
+    }
+    await refreshMine(); loadChain();
+  } catch(e) { setStatus(label + " cancelled or rejected."); }
+}
+btnMint.onclick = () => sendTx(SEL.mint, "Mint");
+btnClaim.onclick = () => sendTx(SEL.claim, "Claim");
+</script>
+</body>
+</html>
