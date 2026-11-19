@@ -487,11 +487,22 @@ async function loadChain(){
       document.getElementById("mintState").textContent = "Sold out";
       document.getElementById("btnMint").disabled = true;
     }
-    const fromHex = "0x" + DEPLOY_BLOCK.toString(16);
-    const [mintLogs, claimLogs] = await Promise.all([
-      rpc("eth_getLogs", [{address: CONTRACT, topics:[TOPIC_MINTED], fromBlock: fromHex, toBlock: "latest"}]),
-      rpc("eth_getLogs", [{address: CONTRACT, topics:[TOPIC_CLAIMED], fromBlock: fromHex, toBlock: "latest"}])
-    ]);
+        // Public RPCs reject one huge log range, so scan in 4,000-block chunks.
+    const head = parseInt(await rpc("eth_blockNumber", []), 16);
+    async function fetchLogs(topic, label){
+      const out = [];
+      for (let from = DEPLOY_BLOCK; from <= head; from += 4000) {
+        const to = Math.min(from + 3999, head);
+        const part = await rpc("eth_getLogs", [{address: CONTRACT, topics:[topic], fromBlock: "0x" + from.toString(16), toBlock: "0x" + to.toString(16)}]);
+        for (const lg of part) out.push(lg);
+        const pct = Math.min(100, Math.round(((to - DEPLOY_BLOCK) / Math.max(1, head - DEPLOY_BLOCK)) * 100));
+        const g = document.getElementById("crewGallery");
+        if (g && g.querySelector("p")) g.querySelector("p").textContent = "Loading " + label + " from chain… " + pct + "%";
+      }
+      return out;
+    }
+    const mintLogs = await fetchLogs(TOPIC_MINTED, "portraits");
+    const claimLogs = await fetchLogs(TOPIC_CLAIMED, "the expedition log");
     const minters = new Map();
     for (const lg of mintLogs) {
       const w = "0x" + lg.topics[1].slice(26);
@@ -499,21 +510,24 @@ async function loadChain(){
     }
     document.getElementById("stMiners").textContent = minters.size;
     // Crew table
-    const rows = [];
+        const rows = [];
     const infoByWallet = new Map();
-    for (const [w, count] of minters) {
-      try {
-        const [hHex, cHex, sHex, lHex, stHex] = await Promise.all([
-          call(REGISTRY, SEL.handleOf + encAddr(w)),
-          call(CONTRACT, SEL.classOf + encAddr(w)),
-          call(CONTRACT, SEL.shardOf + encAddr(w)),
-          call(CONTRACT, SEL.levelOf + encAddr(w)),
-          call(CONTRACT, SEL.streakOf + encAddr(w))
-        ]);
-        const hnd = decodeString(hHex), clsIdx = u256(cHex);
-        infoByWallet.set(w, {handle: hnd, cls: clsIdx});
-        rows.push({handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
-      } catch(e) { /* skip a row rather than break the table */ }
+    const entries = Array.from(minters);
+    for (let i = 0; i < entries.length; i += 12) {
+      await Promise.all(entries.slice(i, i + 12).map(async ([w, count]) => {
+        try {
+          const [hHex, cHex, sHex, lHex, stHex] = await Promise.all([
+            call(REGISTRY, SEL.handleOf + encAddr(w)),
+            call(CONTRACT, SEL.classOf + encAddr(w)),
+            call(CONTRACT, SEL.shardOf + encAddr(w)),
+            call(CONTRACT, SEL.levelOf + encAddr(w)),
+            call(CONTRACT, SEL.streakOf + encAddr(w))
+          ]);
+          const hnd = decodeString(hHex), clsIdx = u256(cHex);
+          infoByWallet.set(w, {handle: hnd, cls: clsIdx});
+          rows.push({handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
+        } catch(e) { /* skip a row rather than break the table */ }
+      }));
     }
     rows.sort((a,b) => b.shard - a.shard || b.count - a.count);
     document.getElementById("crewBody").innerHTML = rows.length
