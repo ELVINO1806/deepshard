@@ -139,6 +139,8 @@
   .gcard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0;transition:border-color .25s ease}
   .gcard:hover{border-color:#2e3852}
   .gcard img{width:100%;display:block;aspect-ratio:1;object-fit:cover;background:#0a0d13}
+  .cardbtn{background:transparent;border:1px solid rgba(240,180,60,.5);color:#f5b942;border-radius:8px;padding:4px 10px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .cardbtn:hover{background:rgba(240,180,60,.12)}
   .gcard figcaption{padding:9px 11px;font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .gcard figcaption b{color:var(--ink)}
   @media (prefers-reduced-motion: reduce){
@@ -260,8 +262,8 @@
     <h2>The crew <span class="a">so far</span></h2>
     <p class="lead">Every miner below minted through the same public gate — no whitelist, no invite, no special access. Read live from the contract.</p>
     <table>
-      <thead><tr><th>Handle</th><th>Class</th><th>Miners</th><th>SHARD</th><th>Level</th><th>Streak</th></tr></thead>
-      <tbody id="crewBody"><tr><td colspan="6" style="color:var(--mut)">Loading from chain…</td></tr></tbody>
+      <thead><tr><th>Handle</th><th>Class</th><th>Miners</th><th>SHARD</th><th>Level</th><th>Streak</th><th>Card</th></tr></thead>
+      <tbody id="crewBody"><tr><td colspan="7" style="color:var(--mut)">Loading from chain…</td></tr></tbody>
     </table>
   </section>
 
@@ -338,6 +340,7 @@
 
 <script>
 const CONTRACT = "0xC463960af285b7EDA0909D362Ae31783597C2076";
+const IMG_BASE = "https://elvino1806.github.io/deepshard/images/";
 const REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
 const RPCS = ["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io","https://bsc.publicnode.com"];
 const DEPLOY_BLOCK = 134351890;
@@ -409,8 +412,8 @@ const SLIDES = [
   {src:"img/class-engineer.webp", cap:"<b>Engineer</b> — keeps the tunnels standing"},
   {src:"img/class-cartographer.webp", cap:"<b>Cartographer</b> — maps the dark"},
   {src:"img/class-lantern.webp", cap:"<b>Lantern Keeper</b> — carries the light"},
-  {src:"images/1.webp", cap:"<b>Miner #0001</b> — the first lantern lit"},
-  {src:"images/5.webp", cap:"<b>Miner #0005</b> — among the first crew"}
+  {src:IMG_BASE + "1.webp", cap:"<b>Miner #0001</b> — the first lantern lit"},
+  {src:IMG_BASE + "5.webp", cap:"<b>Miner #0005</b> — among the first crew"}
 ];
 (function(){
   const stage = document.getElementById("slideLink");
@@ -487,7 +490,7 @@ async function loadChain(){
       document.getElementById("mintState").textContent = "Sold out";
       document.getElementById("btnMint").disabled = true;
     }
-        // Public RPCs reject one huge log range, so scan in 4,000-block chunks.
+    // Public RPCs reject one huge log range, so scan in 4,000-block chunks.
     const head = parseInt(await rpc("eth_blockNumber", []), 16);
     async function fetchLogs(topic, label){
       const out = [];
@@ -510,7 +513,7 @@ async function loadChain(){
     }
     document.getElementById("stMiners").textContent = minters.size;
     // Crew table
-        const rows = [];
+    const rows = [];
     const infoByWallet = new Map();
     const entries = Array.from(minters);
     for (let i = 0; i < entries.length; i += 12) {
@@ -525,14 +528,19 @@ async function loadChain(){
           ]);
           const hnd = decodeString(hHex), clsIdx = u256(cHex);
           infoByWallet.set(w, {handle: hnd, cls: clsIdx});
-          rows.push({handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
+          rows.push({w, handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
         } catch(e) { /* skip a row rather than break the table */ }
       }));
     }
     rows.sort((a,b) => b.shard - a.shard || b.count - a.count);
     document.getElementById("crewBody").innerHTML = rows.length
-      ? rows.map(r => "<tr><td><b>" + esc(r.handle) + "</b>.ai</td><td>" + CLASSES[r.cls] + "</td><td>" + r.count + "</td><td>" + r.shard.toLocaleString() + "</td><td>Lv " + r.level + "</td><td>" + r.streak + " day" + (r.streak===1?"":"s") + "</td></tr>").join("")
-      : '<tr><td colspan="6" style="color:var(--mut)">No miners yet.</td></tr>';
+      ? rows.map(r => "<tr><td><b>" + esc(r.handle) + "</b>.ai</td><td>" + CLASSES[r.cls] + "</td><td>" + r.count + "</td><td>" + r.shard.toLocaleString() + "</td><td>Lv " + r.level + "</td><td>" + r.streak + " day" + (r.streak===1?"":"s") + "</td><td><button type=\"button\" class=\"cardbtn\" data-wallet=\"" + r.w + "\">⬇ Card</button></td></tr>").join("")
+      : '<tr><td colspan="7" style="color:var(--mut)">No miners yet.</td></tr>';
+    // Miner Card data (per wallet; first minted token = portrait)
+    const firstToken = new Map();
+    for (const lg of mintLogs) { const w0 = "0x" + lg.topics[1].slice(26); if (!firstToken.has(w0)) firstToken.set(w0, parseInt(lg.topics[2], 16)); }
+    window.__cardData = {};
+    for (const r of rows) window.__cardData[r.w] = {handle: r.handle, cls: r.cls, shard: r.shard, level: r.level, streak: r.streak, tokenId: firstToken.get(r.w)};
     // Crew gallery — most recent 24 minted tokens; cards hide themselves if a portrait is not produced yet
     const galleryEl = document.getElementById("crewGallery");
     if (galleryEl) {
@@ -544,7 +552,7 @@ async function loadChain(){
         const hLabel = info ? esc(info.handle) : (w.slice(0,6) + "…" + w.slice(-4));
         const cLabel = info ? CLASSES[info.cls] : "";
         const idLabel = "#" + String(tokenId).padStart(4,"0");
-        return '<figure class="gcard"><a href="images/' + tokenId + '.webp" target="_blank" rel="noopener" title="View full size"><img src="images/' + tokenId + '.webp" alt="DeepShard Miner ' + idLabel + '" loading="lazy" onerror="this.closest(\'figure\').style.display=\'none\'"></a><figcaption><b>' + idLabel + '</b> · ' + hLabel + (cLabel ? ' · ' + cLabel : '') + '</figcaption></figure>';
+        return '<figure class="gcard"><a href="' + IMG_BASE + tokenId + '.webp" target="_blank" rel="noopener" title="View full size"><img src="' + IMG_BASE + tokenId + '.webp" alt="DeepShard Miner ' + idLabel + '" loading="lazy" onerror="this.closest(\'figure\').style.display=\'none\'"></a><figcaption><b>' + idLabel + '</b> · ' + hLabel + (cLabel ? ' · ' + cLabel : '') + '</figcaption></figure>';
       }).join("") : '<p style="color:var(--mut);font-size:14px">No miners yet.</p>';
     }
     // Expedition log
@@ -642,6 +650,60 @@ async function sendTx(data, label){
 }
 btnMint.onclick = () => sendTx(SEL.mint, "Mint");
 btnClaim.onclick = () => sendTx(SEL.claim, "Claim");
+</script>
+<div id="cardModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,10,.85);z-index:60;align-items:center;justify-content:center;padding:18px">
+  <div style="max-width:min(92vw,540px);width:100%;text-align:center">
+    <canvas id="cardCanvas" width="1200" height="1200" style="width:100%;height:auto;border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.6);background:#05080d"></canvas>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a id="cardDownload" class="btn-mint" href="#" download style="text-decoration:none;display:inline-block">Download PNG</a>
+      <button type="button" class="btn-wallet" onclick="document.getElementById('cardModal').style.display='none'">Close</button>
+    </div>
+    <p style="color:var(--mut);font-size:13px;margin-top:10px">Your miner card — handle, class, level and streak, straight from chain. Share it anywhere.</p>
+  </div>
+</div>
+<script>
+window.makeCard = function(w){
+  var d = (window.__cardData || {})[w];
+  if (!d || !d.tokenId) return;
+  var cv = document.getElementById("cardCanvas"), ctx = cv.getContext("2d");
+  var W = 1200, H = 1200;
+  var g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#0d1420"); g.addColorStop(1, "#05080d");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  var img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = function(){
+    var tw = W, th = 830;
+    var s = Math.max(tw / img.width, th / img.height);
+    var dw = img.width * s, dh = img.height * s;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, tw, th); ctx.clip();
+    ctx.drawImage(img, (tw - dw) / 2, (th - dh) / 2, dw, dh); ctx.restore();
+    var fg = ctx.createLinearGradient(0, th - 190, 0, th);
+    fg.addColorStop(0, "rgba(5,8,13,0)"); fg.addColorStop(1, "rgba(5,8,13,1)");
+    ctx.fillStyle = fg; ctx.fillRect(0, th - 190, W, 190);
+    ctx.strokeStyle = "rgba(240,180,60,.55)"; ctx.lineWidth = 6; ctx.strokeRect(18, 18, W - 36, H - 36);
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#f5b942"; ctx.font = "700 66px system-ui, sans-serif";
+    ctx.fillText("MINER #" + String(d.tokenId).padStart(4, "0"), 64, 952);
+    ctx.fillStyle = "#e8eef4"; ctx.font = "600 52px system-ui, sans-serif";
+    ctx.fillText(d.handle + ".ai · " + CLASSES[d.cls], 64, 1026);
+    ctx.fillStyle = "#9fb2c3"; ctx.font = "500 44px system-ui, sans-serif";
+    ctx.fillText("Level " + d.level + "  ·  " + d.shard.toLocaleString() + " SHARD  ·  Streak " + d.streak + " day" + (d.streak === 1 ? "" : "s"), 64, 1094);
+    ctx.fillStyle = "#5f7185"; ctx.font = "500 33px system-ui, sans-serif";
+    ctx.fillText("DeepShard — The First Descent · deepshard-mine.vercel.app", 64, 1152);
+    document.getElementById("cardModal").style.display = "flex";
+    var a = document.getElementById("cardDownload");
+    a.download = "deepshard-miner-" + String(d.tokenId).padStart(4, "0") + ".png";
+    if (cv.toBlob) cv.toBlob(function(b){ if (b) a.href = URL.createObjectURL(b); }, "image/png");
+  };
+  img.onerror = function(){ alert("Portrait is still loading — try again in a moment."); };
+  img.src = IMG_BASE + d.tokenId + ".webp";
+};
+document.addEventListener("click", function(e){
+  var b = e.target && e.target.closest ? e.target.closest(".cardbtn") : null;
+  if (b) window.makeCard(b.getAttribute("data-wallet"));
+  if (e.target && e.target.id === "cardModal") e.target.style.display = "none";
+});
 </script>
 </body>
 </html>
