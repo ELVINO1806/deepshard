@@ -57,6 +57,14 @@
   .miles span.next{color:#ffd97a;font-weight:700;text-shadow:0 0 10px rgba(245,185,66,.5)}
   .nextlayer{margin-top:10px;font-size:14px;color:var(--amber);font-weight:600}
   .seasonline{margin-top:4px;font-size:13px;color:var(--mut)}
+  .classboard{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);text-align:left}
+  .cb-title{font-weight:700;margin-bottom:8px}
+  .cb-row{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;flex-wrap:wrap}
+  .cb-row.today{background:rgba(245,185,66,.08)}
+  .cb-rank{font-weight:800;color:var(--amber);min-width:18px}
+  .cb-name{font-weight:600}
+  .cb-nums{margin-left:auto;color:var(--mut);font-size:14px}
+  .cb-nums b{color:var(--ink)}
   .ticker{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;margin:14px 0 0;font-size:13.5px;text-align:left;overflow:hidden}
   .ticklabel{color:var(--amber);font-weight:700;white-space:nowrap}
   #tickerText{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .45s ease}
@@ -276,6 +284,7 @@
       <thead><tr><th>Handle</th><th>Class</th><th>Miners</th><th>SHARD</th><th>Level</th><th>Streak</th><th>Card</th></tr></thead>
       <tbody id="crewBody"><tr><td colspan="7" style="color:var(--mut)">Loading from chain…</td></tr></tbody>
     </table>
+    <div id="classBoard" class="classboard" style="display:none"></div>
   </section>
 
   <section>
@@ -601,6 +610,17 @@ async function loadChain(){
     // Miner Card data (per wallet; lowest held token = portrait)
     window.__cardData = {};
     for (const r of rows) window.__cardData[r.w] = {handle: r.handle, cls: r.cls, shard: r.shard, level: r.level, streak: r.streak, tokenId: Math.min(...holders.get(r.w))};
+    // Class rivalry — Season 1 totals per class, from the crew rows above
+    const boardEl = document.getElementById("classBoard");
+    if (boardEl && rows.length) {
+      const agg = CLASSES.map((name, i) => ({i, name, wallets: 0, miners: 0, shard: 0}));
+      for (const r of rows) { const a = agg[r.cls]; a.wallets++; a.miners += r.count; a.shard += r.shard; }
+      agg.sort((a, b) => b.shard - a.shard);
+      boardEl.innerHTML = '<div class="cb-title">⚔ Class rivalry — Season 1 totals by SHARD</div>' + agg.map((a, pos) =>
+        '<div class="cb-row' + (a.i === todayClass ? " today" : "") + '"><span class="cb-rank">' + (pos + 1) + '</span><span class="cb-name">' + a.name + (a.i === todayClass ? ' <span class="badge">TODAY · 2× depth</span>' : "") + '</span><span class="cb-nums">' + a.wallets + ' wallets · ' + a.miners + ' miners · <b>' + a.shard.toLocaleString() + ' SHARD</b></span></div>'
+      ).join("");
+      boardEl.style.display = "";
+    }
     // Crew gallery — the 24 highest token ids, from enumeration data;
     // cards hide themselves if a portrait is not produced yet
     const galleryEl = document.getElementById("crewGallery");
