@@ -194,7 +194,7 @@
 
     <div class="stats">
       <div class="stat"><b id="stSupply">…</b><small>Miners minted / 3,333</small></div>
-      <div class="stat"><b id="stMiners">…</b><small>Unique miners</small></div>
+      <div class="stat"><b id="stMiners">…</b><small>Miner wallets</small></div>
       <div class="stat"><b id="stDepth">…</b><small>Metres dug together</small></div>
       <div class="stat"><b id="stClassDay">…</b><small>Class of the day (2× depth)</small></div>
     </div>
@@ -368,7 +368,7 @@ const SEL = {
   balanceOf:"0x70a08231", shardOf:"0xf01d24e8", streakOf:"0x4fc1854a",
   levelOf:"0x5c138c9d", pendingOf:"0xf44136a1", mintedBy:"0x3cef28d2",
   handleOf:"0xc50a1514", classOf:"0xeac9587f",
-  mint:"0x1249c58b", claim:"0x4e71d92d"
+  mint:"0x1249c58b", claim:"0x4e71d92d", ownerOf:"0x6352211e"
 };
 const TOPIC_MINTED = "0x25b428dfde728ccfaddad7e29e4ac23c24ed7fd1a6e3e3f91894a9a073f5dfff";
 const TOPIC_CLAIMED = "0x7708755c9b641bf197be5047b04002d2e88fa658c173a351067747eb5dfc568a";
@@ -390,6 +390,36 @@ async function rpc(method, params){
   throw lastErr;
 }
 function encAddr(a){ return "000000000000000000000000" + a.replace("0x","").toLowerCase(); }
+function encUint(n){ return n.toString(16).padStart(64, "0"); }
+async function batchCall(list){
+  // list: [{to, data}] -> hex results in the same order, via JSON-RPC batch
+  // requests (chunks of 50). Falls back to individual calls per chunk when
+  // every endpoint refuses the batch.
+  const out = new Array(list.length);
+  const CH = 50;
+  for (let i = 0; i < list.length; i += CH) {
+    const slice = list.slice(i, i + CH);
+    let done = false;
+    for (let k = 0; k < RPCS.length && !done; k++) {
+      const idx = (rpcIdx + k) % RPCS.length;
+      try {
+        const body = slice.map(c => ({jsonrpc:"2.0", id: ++rpcId, method:"eth_call", params:[{to: c.to, data: c.data}, "latest"]}));
+        const r = await fetch(RPCS[idx], {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+        const j = await r.json();
+        if (!Array.isArray(j)) throw new Error("no batch");
+        const byId = new Map(j.map(x => [x.id, x]));
+        slice.forEach((c, j2) => {
+          const item = byId.get(body[j2].id);
+          if (!item || item.error) throw new Error("batch item failed");
+          out[i + j2] = item.result;
+        });
+        rpcIdx = idx; done = true;
+      } catch(e) { /* try next endpoint */ }
+    }
+    if (!done) for (let j2 = 0; j2 < slice.length; j2++) out[i + j2] = await call(slice[j2].to, slice[j2].data);
+  }
+  return out;
+}
 async function call(to, data){ return rpc("eth_call", [{to, data}, "latest"]); }
 function u256(hex){ return parseInt(hex, 16); }
 function decodeString(hex){
@@ -511,85 +541,74 @@ async function loadChain(){
       document.getElementById("mintState").textContent = "Sold out";
       document.getElementById("btnMint").disabled = true;
     }
-    // Public RPCs reject one huge log range, so scan in chunks — and some
-    // endpoints quietly return partial results under load, so the mint scan
-    // is verified against totalSupply and re-scanned finer until complete.
+    // Crew data comes from token enumeration (ownerOf per token), NOT from
+    // event logs: several public RPCs silently return empty results for
+    // historical log ranges, which once shrank this table to recent minters
+    // only. eth_call reads are reliable at any age.
     const head = parseInt(await rpc("eth_blockNumber", []), 16);
-    async function scanOnce(topic, label, chunk){
-      const out = [];
-      for (let from = DEPLOY_BLOCK; from <= head; from += chunk) {
-        const to = Math.min(from + chunk - 1, head);
-        const part = await rpc("eth_getLogs", [{address: CONTRACT, topics:[topic], fromBlock: "0x" + from.toString(16), toBlock: "0x" + to.toString(16)}]);
-        for (const lg of part) out.push(lg);
-        const pct = Math.min(100, Math.round(((to - DEPLOY_BLOCK) / Math.max(1, head - DEPLOY_BLOCK)) * 100));
-        const g = document.getElementById("crewGallery");
-        if (g && g.querySelector("p")) g.querySelector("p").textContent = "Loading " + label + " from chain… " + pct + "%";
-      }
-      return out;
-    }
-    function unionLogs(a, b){
-      const seen = new Map();
-      for (const lg of a.concat(b)) seen.set(lg.transactionHash + ":" + lg.logIndex, lg);
-      return Array.from(seen.values()).sort((x, y) => (parseInt(x.blockNumber, 16) - parseInt(y.blockNumber, 16)) || (parseInt(x.logIndex, 16) - parseInt(y.logIndex, 16)));
-    }
-    async function fetchLogs(topic, label, expected){
-      let out = await scanOnce(topic, label, 4000);
-      if (expected && out.length < expected) out = unionLogs(out, await scanOnce(topic, label, 1000));
-      if (expected && out.length < expected) out = unionLogs(out, await scanOnce(topic, label, 500));
-      return out;
-    }
-    const mintLogs = await fetchLogs(TOPIC_MINTED, "portraits", supply);
-    const claimLogs = await fetchLogs(TOPIC_CLAIMED, "the expedition log", 0);
-    const minters = new Map();
-    for (const lg of mintLogs) {
-      const w = "0x" + lg.topics[1].slice(26);
-      minters.set(w, (minters.get(w) || 0) + 1);
-    }
-    document.getElementById("stMiners").textContent = minters.size;
+    const ownerReqs = [];
+    for (let id = 1; id <= supply; id++) ownerReqs.push({to: CONTRACT, data: SEL.ownerOf + encUint(id)});
+    const ownerRes = await batchCall(ownerReqs);
+    const holders = new Map();
+    ownerRes.forEach((hex, i) => {
+      if (!hex) return;
+      const w = "0x" + hex.slice(26).toLowerCase();
+      if (!holders.has(w)) holders.set(w, []);
+      holders.get(w).push(i + 1);
+    });
+    document.getElementById("stMiners").textContent = holders.size;
     // Crew table
     const rows = [];
     const infoByWallet = new Map();
-    const entries = Array.from(minters);
-    async function lookup(w, count){
-      const [hHex, cHex, sHex, lHex, stHex] = await Promise.all([
-        call(REGISTRY, SEL.handleOf + encAddr(w)),
-        call(CONTRACT, SEL.classOf + encAddr(w)),
-        call(CONTRACT, SEL.shardOf + encAddr(w)),
-        call(CONTRACT, SEL.levelOf + encAddr(w)),
-        call(CONTRACT, SEL.streakOf + encAddr(w))
-      ]);
-      const hnd = decodeString(hHex), clsIdx = u256(cHex);
+    const entries = Array.from(holders.entries()).map(([w, ids]) => [w, ids.length]);
+    const statReqs = [];
+    for (const [w] of entries) {
+      statReqs.push({to: REGISTRY, data: SEL.handleOf + encAddr(w)});
+      statReqs.push({to: CONTRACT, data: SEL.classOf + encAddr(w)});
+      statReqs.push({to: CONTRACT, data: SEL.shardOf + encAddr(w)});
+      statReqs.push({to: CONTRACT, data: SEL.levelOf + encAddr(w)});
+      statReqs.push({to: CONTRACT, data: SEL.streakOf + encAddr(w)});
+    }
+    const statRes = await batchCall(statReqs);
+    entries.forEach(([w, count], i) => {
+      const parts = statRes.slice(i * 5, i * 5 + 5);
+      if (parts.some(x => x === undefined)) return;
+      const hnd = decodeString(parts[0]), clsIdx = u256(parts[1]);
       infoByWallet.set(w, {handle: hnd, cls: clsIdx});
-      rows.push({w, handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
+      rows.push({w, handle: hnd, cls: clsIdx, count, shard: u256(parts[2]), level: u256(parts[3]), streak: u256(parts[4])});
+    });
+    // Expedition diary — recent activity only. Historical log ranges are
+    // unreliable on public RPCs, so the diary scans a recent window; the
+    // crew table above no longer depends on logs at all.
+    async function scanRecent(topic){
+      const out = [];
+      const from0 = Math.max(DEPLOY_BLOCK, head - 150000);
+      for (let from = from0; from <= head; from += 4000) {
+        const to = Math.min(from + 3999, head);
+        try {
+          const part = await rpc("eth_getLogs", [{address: CONTRACT, topics:[topic], fromBlock: "0x" + from.toString(16), toBlock: "0x" + to.toString(16)}]);
+          for (const lg of part) out.push(lg);
+        } catch(e) { /* a missed chunk only shortens the diary */ }
+      }
+      return out;
     }
-    // Gentle batches (public RPCs rate-limit easily) + one sequential retry
-    // pass, so a rate-limited wallet is not silently dropped from the table.
-    const failed = [];
-    for (let i = 0; i < entries.length; i += 6) {
-      await Promise.all(entries.slice(i, i + 6).map(async ([w, count]) => {
-        try { await lookup(w, count); }
-        catch(e) { failed.push([w, count]); }
-      }));
-    }
-    for (const [w, count] of failed) {
-      try { await lookup(w, count); } catch(e) { /* one missing row beats a broken table */ }
-    }
+    const mintLogs = await scanRecent(TOPIC_MINTED);
+    const claimLogs = await scanRecent(TOPIC_CLAIMED);
     rows.sort((a,b) => b.shard - a.shard || b.count - a.count);
     document.getElementById("crewBody").innerHTML = rows.length
       ? rows.map(r => "<tr><td><b>" + esc(r.handle) + "</b>.ai</td><td>" + CLASSES[r.cls] + "</td><td>" + r.count + "</td><td>" + r.shard.toLocaleString() + "</td><td>Lv " + r.level + "</td><td>" + r.streak + " day" + (r.streak===1?"":"s") + "</td><td><button type=\"button\" class=\"cardbtn\" data-wallet=\"" + r.w + "\">⬇ Card</button></td></tr>").join("")
       : '<tr><td colspan="7" style="color:var(--mut)">No miners yet.</td></tr>';
-    // Miner Card data (per wallet; first minted token = portrait)
-    const firstToken = new Map();
-    for (const lg of mintLogs) { const w0 = "0x" + lg.topics[1].slice(26); if (!firstToken.has(w0)) firstToken.set(w0, parseInt(lg.topics[2], 16)); }
+    // Miner Card data (per wallet; lowest held token = portrait)
     window.__cardData = {};
-    for (const r of rows) window.__cardData[r.w] = {handle: r.handle, cls: r.cls, shard: r.shard, level: r.level, streak: r.streak, tokenId: firstToken.get(r.w)};
-    // Crew gallery — most recent 24 minted tokens; cards hide themselves if a portrait is not produced yet
+    for (const r of rows) window.__cardData[r.w] = {handle: r.handle, cls: r.cls, shard: r.shard, level: r.level, streak: r.streak, tokenId: Math.min(...holders.get(r.w))};
+    // Crew gallery — the 24 highest token ids, from enumeration data;
+    // cards hide themselves if a portrait is not produced yet
     const galleryEl = document.getElementById("crewGallery");
     if (galleryEl) {
-      const recent = mintLogs.slice(-24).reverse();
-      galleryEl.innerHTML = recent.length ? recent.map(lg => {
-        const w = "0x" + lg.topics[1].slice(26);
-        const tokenId = parseInt(lg.topics[2], 16);
+      const recent = [];
+      for (let id = supply; id >= 1 && recent.length < 24; id--) recent.push(id);
+      galleryEl.innerHTML = recent.length ? recent.map(tokenId => {
+        const w = "0x" + ownerRes[tokenId - 1].slice(26).toLowerCase();
         const info = infoByWallet.get(w);
         const hLabel = info ? esc(info.handle) : (w.slice(0,6) + "…" + w.slice(-4));
         const cLabel = info ? CLASSES[info.cls] : "";
