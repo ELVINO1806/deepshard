@@ -53,6 +53,13 @@
   .bar i::after{content:"";position:absolute;right:0;top:0;bottom:0;width:12px;border-radius:999px;background:radial-gradient(circle at right center,rgba(255,240,200,.95),rgba(255,207,110,0) 70%)}
   .miles{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-top:6px;flex-wrap:wrap;gap:4px}
   .miles span{transition:color .4s ease}
+  .miles span.reached{color:var(--amber);font-weight:600}
+  .miles span.next{color:#ffd97a;font-weight:700;text-shadow:0 0 10px rgba(245,185,66,.5)}
+  .nextlayer{margin-top:10px;font-size:14px;color:var(--amber);font-weight:600}
+  .seasonline{margin-top:4px;font-size:13px;color:var(--mut)}
+  .ticker{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;margin:14px 0 0;font-size:13.5px;text-align:left;overflow:hidden}
+  .ticklabel{color:var(--amber);font-weight:700;white-space:nowrap}
+  #tickerText{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .45s ease}
   .miles span.reached{color:var(--amber2);font-weight:700}
   .cta{display:flex;gap:12px;justify-content:center;margin:26px 0 6px;flex-wrap:wrap}
   button{cursor:pointer;border:none;border-radius:12px;padding:14px 28px;font-size:16px;font-weight:700}
@@ -192,10 +199,14 @@
       <div class="stat"><b id="stClassDay">…</b><small>Class of the day (2× depth)</small></div>
     </div>
 
+    <div class="ticker"><span class="ticklabel">⛏ Live from the mine</span><span id="tickerText">Reading the latest expeditions…</span></div>
+
     <div class="depthbox">
       <div class="row"><span>Collective Depth Meter</span><b><span id="depthNow">…</span> / 10,000 m</b></div>
       <div class="bar"><i id="depthBar"></i></div>
       <div class="miles"><span data-m="100">100 m · Topsoil</span><span data-m="500">500 m · Clay Belt</span><span data-m="1000">1,000 m · Old Tunnels</span><span data-m="2500">2,500 m · Crystal Field</span><span data-m="5000">5,000 m · Magma Shelf</span><span data-m="10000">10,000 m · Rainbow Core</span></div>
+      <div class="nextlayer" id="nextLayer"></div>
+      <div class="seasonline" id="seasonLine"></div>
     </div>
 
     <div class="cta">
@@ -480,12 +491,22 @@ async function loadChain(){
     ]);
     const supply = u256(sup), depth = u256(dep);
     document.getElementById("stSupply").textContent = supply.toLocaleString();
+    document.getElementById("stDepth").textContent = depth.toLocaleString();
     document.getElementById("depthNow").textContent = depth.toLocaleString();
     const depthPct = Math.min(100, depth/100) + "%";
     requestAnimationFrame(() => { document.getElementById("depthBar").style.width = depthPct; });
+    let nextMile = null;
     document.querySelectorAll(".miles span").forEach(sp => {
-      if (depth >= parseInt(sp.getAttribute("data-m"), 10)) sp.classList.add("reached");
+      const m = parseInt(sp.getAttribute("data-m"), 10);
+      if (depth >= m) sp.classList.add("reached");
+      else if (!nextMile) { nextMile = {m, label: sp.textContent}; sp.classList.add("next"); }
     });
+    const nl = document.getElementById("nextLayer");
+    if (nl) nl.textContent = nextMile
+      ? "⛏ Next layer: " + nextMile.label.split("·")[1].trim() + " at " + nextMile.m.toLocaleString() + " m — " + (nextMile.m - depth).toLocaleString() + " m to go. Every claim digs +4 m."
+      : "🏆 Every layer breached — the crew dug the whole mine.";
+    const sl = document.getElementById("seasonLine");
+    if (sl) sl.textContent = "Season 1 · The First Descent — " + supply.toLocaleString() + " of 3,333 miners minted (" + (supply / 33.33).toFixed(1) + "%) · collective depth " + depth.toLocaleString() + " of 10,000 m.";
     if (u256(open) === 0) {
       document.getElementById("mintState").textContent = "Sold out";
       document.getElementById("btnMint").disabled = true;
@@ -582,8 +603,29 @@ async function loadChain(){
       }
     }
     document.getElementById("expLog").innerHTML = lines.length ? lines.join("") : "<div>No expeditions yet. The first lantern is lit.</div>";
+    // Live ticker — rotate the latest expeditions under the stats row
+    const tickEl = document.getElementById("tickerText");
+    if (tickEl && lines.length) {
+      window.__tickItems = lines.slice(0, 8).map(h => h.replace(/<[^>]+>/g, ""));
+      window.__tickIdx = 0;
+      tickEl.textContent = window.__tickItems[0];
+      if (!window.__tickerTimer) {
+        window.__tickerTimer = setInterval(() => {
+          const el = document.getElementById("tickerText");
+          if (!el || !window.__tickItems || !window.__tickItems.length) return;
+          el.style.opacity = "0";
+          setTimeout(() => {
+            window.__tickIdx = (window.__tickIdx + 1) % window.__tickItems.length;
+            el.textContent = window.__tickItems[window.__tickIdx];
+            el.style.opacity = "1";
+          }, 460);
+        }, 4200);
+      }
+    }
   } catch(e) {
     document.getElementById("expLog").innerHTML = "<div>Could not reach the chain just now. The mine is still there — refresh in a moment.</div>";
+    const tk = document.getElementById("tickerText");
+    if (tk) tk.textContent = "The mine is quiet for a moment — the crew is still digging.";
   }
 }
 loadChain();
