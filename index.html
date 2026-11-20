@@ -353,7 +353,7 @@
 const CONTRACT = "0xC463960af285b7EDA0909D362Ae31783597C2076";
 const IMG_BASE = "https://elvino1806.github.io/deepshard/images/";
 const REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
-const RPCS = ["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io","https://bsc.publicnode.com"];
+const RPCS = ["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io","https://bsc.publicnode.com","https://bsc.drpc.org"];
 const DEPLOY_BLOCK = 134351890;
 const CLASSES = ["Driller","Blaster","Engineer","Cartographer","Lantern Keeper"];
 const CLASS_DESC = [
@@ -511,12 +511,14 @@ async function loadChain(){
       document.getElementById("mintState").textContent = "Sold out";
       document.getElementById("btnMint").disabled = true;
     }
-    // Public RPCs reject one huge log range, so scan in 4,000-block chunks.
+    // Public RPCs reject one huge log range, so scan in chunks — and some
+    // endpoints quietly return partial results under load, so the mint scan
+    // is verified against totalSupply and re-scanned finer until complete.
     const head = parseInt(await rpc("eth_blockNumber", []), 16);
-    async function fetchLogs(topic, label){
+    async function scanOnce(topic, label, chunk){
       const out = [];
-      for (let from = DEPLOY_BLOCK; from <= head; from += 4000) {
-        const to = Math.min(from + 3999, head);
+      for (let from = DEPLOY_BLOCK; from <= head; from += chunk) {
+        const to = Math.min(from + chunk - 1, head);
         const part = await rpc("eth_getLogs", [{address: CONTRACT, topics:[topic], fromBlock: "0x" + from.toString(16), toBlock: "0x" + to.toString(16)}]);
         for (const lg of part) out.push(lg);
         const pct = Math.min(100, Math.round(((to - DEPLOY_BLOCK) / Math.max(1, head - DEPLOY_BLOCK)) * 100));
@@ -525,8 +527,19 @@ async function loadChain(){
       }
       return out;
     }
-    const mintLogs = await fetchLogs(TOPIC_MINTED, "portraits");
-    const claimLogs = await fetchLogs(TOPIC_CLAIMED, "the expedition log");
+    function unionLogs(a, b){
+      const seen = new Map();
+      for (const lg of a.concat(b)) seen.set(lg.transactionHash + ":" + lg.logIndex, lg);
+      return Array.from(seen.values()).sort((x, y) => (parseInt(x.blockNumber, 16) - parseInt(y.blockNumber, 16)) || (parseInt(x.logIndex, 16) - parseInt(y.logIndex, 16)));
+    }
+    async function fetchLogs(topic, label, expected){
+      let out = await scanOnce(topic, label, 4000);
+      if (expected && out.length < expected) out = unionLogs(out, await scanOnce(topic, label, 1000));
+      if (expected && out.length < expected) out = unionLogs(out, await scanOnce(topic, label, 500));
+      return out;
+    }
+    const mintLogs = await fetchLogs(TOPIC_MINTED, "portraits", supply);
+    const claimLogs = await fetchLogs(TOPIC_CLAIMED, "the expedition log", 0);
     const minters = new Map();
     for (const lg of mintLogs) {
       const w = "0x" + lg.topics[1].slice(26);
