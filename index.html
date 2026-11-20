@@ -537,21 +537,29 @@ async function loadChain(){
     const rows = [];
     const infoByWallet = new Map();
     const entries = Array.from(minters);
-    for (let i = 0; i < entries.length; i += 12) {
-      await Promise.all(entries.slice(i, i + 12).map(async ([w, count]) => {
-        try {
-          const [hHex, cHex, sHex, lHex, stHex] = await Promise.all([
-            call(REGISTRY, SEL.handleOf + encAddr(w)),
-            call(CONTRACT, SEL.classOf + encAddr(w)),
-            call(CONTRACT, SEL.shardOf + encAddr(w)),
-            call(CONTRACT, SEL.levelOf + encAddr(w)),
-            call(CONTRACT, SEL.streakOf + encAddr(w))
-          ]);
-          const hnd = decodeString(hHex), clsIdx = u256(cHex);
-          infoByWallet.set(w, {handle: hnd, cls: clsIdx});
-          rows.push({w, handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
-        } catch(e) { /* skip a row rather than break the table */ }
+    async function lookup(w, count){
+      const [hHex, cHex, sHex, lHex, stHex] = await Promise.all([
+        call(REGISTRY, SEL.handleOf + encAddr(w)),
+        call(CONTRACT, SEL.classOf + encAddr(w)),
+        call(CONTRACT, SEL.shardOf + encAddr(w)),
+        call(CONTRACT, SEL.levelOf + encAddr(w)),
+        call(CONTRACT, SEL.streakOf + encAddr(w))
+      ]);
+      const hnd = decodeString(hHex), clsIdx = u256(cHex);
+      infoByWallet.set(w, {handle: hnd, cls: clsIdx});
+      rows.push({w, handle: hnd, cls: clsIdx, count, shard: u256(sHex), level: u256(lHex), streak: u256(stHex)});
+    }
+    // Gentle batches (public RPCs rate-limit easily) + one sequential retry
+    // pass, so a rate-limited wallet is not silently dropped from the table.
+    const failed = [];
+    for (let i = 0; i < entries.length; i += 6) {
+      await Promise.all(entries.slice(i, i + 6).map(async ([w, count]) => {
+        try { await lookup(w, count); }
+        catch(e) { failed.push([w, count]); }
       }));
+    }
+    for (const [w, count] of failed) {
+      try { await lookup(w, count); } catch(e) { /* one missing row beats a broken table */ }
     }
     rows.sort((a,b) => b.shard - a.shard || b.count - a.count);
     document.getElementById("crewBody").innerHTML = rows.length
