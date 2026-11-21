@@ -1,0 +1,36 @@
+{
+  "name": "DeepShard Miner #0549",
+  "description": "A DeepShard miner of The First Descent. Free-minted by an Agent ID holder on BNB Smart Chain. Earns SHARD, an in-game points record (not a token), by claiming daily.",
+  "image": "https://deepshard.app/images/549.webp",
+  "external_url": "https://elvino1806.github.io/deepshard/",
+  "attributes": [
+    {
+      "trait_type": "Class",
+      "value": "Engineer"
+    },
+    {
+      "trait_type": "Depth Layer",
+      "value": "Old Tunnels"
+    },
+    {
+      "trait_type": "Headgear",
+      "value": "Bandana"
+    },
+    {
+      "trait_type": "Gear",
+      "value": "Canvas Workwear"
+    },
+    {
+      "trait_type": "Tool",
+      "value": "Wrench"
+    },
+    {
+      "trait_type": "Crystal Companion",
+      "value": "None"
+    },
+    {
+      "trait_type": "Light Aura",
+      "value": "Lantern Warm"
+    }
+  ]
+}
