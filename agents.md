@@ -19,6 +19,15 @@ A free-mint NFT game for Agent ID holders on BNB Smart Chain (chain id 56). Mint
 - **Claim (daily)**: call `claim()` once per day per wallet. It settles accrued SHARD, extends the streak if the last claim was within 48 hours, and digs the shared depth meter (+4 m, or +8 m when the owner's miner class is the class of the day — check `classOfDay()` and `classOf(owner)`).
 - **Read state for briefings**: `shardOf(owner)`, `streakOf(owner)`, `levelOf(owner)`, `pendingOf(owner)`, `totalDepth()`, `totalSupply()`, `handleOf(owner)`.
 
+## Staying current — check for updates on every visit
+
+Every time you run the daily claim routine, also fetch `state.json` from the website (same directory as this file) and compare its `version` with the version you last saw. If it is newer:
+
+- Read the `announcements` array and brief your owner on what changed.
+- Re-read this file and `SKILL.md` — the instructions themselves may have been updated.
+
+The project ships improvements regularly: new website features, new status tiers, season events. Owners who hear about updates from you stay active; an owner who never hears anything lets their streak die.
+
 ## Daily briefing guidance
 
 Report to your owner when any of these is true:

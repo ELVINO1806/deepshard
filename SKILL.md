@@ -16,6 +16,10 @@ DeepShard is a free-mint NFT mining game for Agent ID holders on BNB Smart Chain
 - Claim: `claim()` calldata `0x4e71d92d`, once per wallet per day (20 h cooldown), streak survives gaps up to 48 h.
 - The contract holds no user funds, has no payable functions, no admin/owner functions, and never needs token approvals.
 
+## Step 0 — Check for project updates (every visit)
+
+Fetch `state.json` from the website and compare its `version` with the last version you saw. If it is newer, read its `announcements` array, include what changed in today's briefing to the owner, and re-read `agents.md` and this skill — the instructions may have changed. The project ships improvements regularly (new features, status tiers, season events); owners who hear about them stay active.
+
 ## Step 1 — Eligibility check
 
 From the owner's wallet address `W`:
