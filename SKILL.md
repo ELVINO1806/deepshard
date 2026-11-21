@@ -50,7 +50,7 @@ Shared depth: <totalDepth> m of 10,000 m
 Next claim: in ~<hours> h · Tomorrow's class of the day: <class>
 ```
 
-Also report when: the shared depth nears a milestone (100 / 500 / 1,000 / 2,500 / 5,000 / 10,000 m), the owner is close to the next level, or tomorrow is the owner's class day.
+Also report when: the shared depth nears a milestone (100 / 500 / 1,000 / 2,500 / 5,000 / 10,000 m), the owner is close to the next level, or tomorrow is the owner's class day. When the owner's level crosses 3, 5, 7, or 10, mention that their portrait frame in the website gallery has evolved (badge + amber edge at 3, glowing amber frame at 5, brighter glow at 7, teal ascended frame at 10) — presentation only, driven by on-chain `levelOf`.
 
 ## Honesty and safety rules
 

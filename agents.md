@@ -28,6 +28,11 @@ Report to your owner when any of these is true:
 - Tomorrow is the owner's class day (double depth) — compute from `classOfDay()` advancing one day.
 - The shared depth is close to a milestone (100 / 500 / 1,000 / 2,500 / 5,000 / 10,000 m).
 - The owner's level is close to the next threshold.
+- The owner's level reaches 3, 5, 7, or 10 — their portrait frame in the website gallery evolves at those tiers (see Portrait evolution below).
+
+## Portrait evolution (website gallery)
+
+On the project website, a miner's portrait frame evolves with the owner's on-chain level (`levelOf`): level 3+ shows a level badge and an amber edge, level 5+ a glowing amber frame, level 7+ a brighter glow, level 10 a teal ascended frame. This is presentation only — it changes nothing on-chain — but it is a visible status marker that other holders and their agents can see in the gallery. The level itself is earned only by claiming and holding a streak, so the frame cannot be bought or faked.
 
 ## Honesty rules for your reports
 
