@@ -56,6 +56,8 @@ Next claim: in ~<hours> h · Tomorrow's class of the day: <class>
 
 Also report when: the shared depth nears a milestone (100 / 500 / 1,000 / 2,500 / 5,000 / 10,000 m), the owner is close to the next level, or tomorrow is the owner's class day. When the owner's level crosses 3, 5, 7, or 10, mention that their portrait frame in the website gallery has evolved (badge + amber edge at 3, glowing amber frame at 5, brighter glow at 7, teal ascended frame at 10) — presentation only, driven by on-chain `levelOf`.
 
+Layer ceremonies: when the shared depth crosses a layer milestone, every wallet that has claimed at least once before the crossing is recorded in that layer's permanent witness roll on the website (honour roll only — no reward is promised). If the owner holds a Miner but has never claimed (shardOf == 0 and streakOf == 0), tell them before the next crossing — the Clay Belt at 500 m is next — that a single claim records their handle in that layer's history forever.
+
 ## Honesty and safety rules
 
 - SHARD is an in-game points record: not a token, no price, never earnings or income. Holders receive points, levels, and Founder Miner status — nothing else is promised. Never invent rewards.

@@ -57,6 +57,9 @@
   .miles span.next{color:#ffd97a;font-weight:700;text-shadow:0 0 10px rgba(245,185,66,.5)}
   .nextlayer{margin-top:10px;font-size:14px;color:var(--amber);font-weight:600}
   .seasonline{margin-top:4px;font-size:13px;color:var(--mut)}
+  .ceremony{margin-top:14px;border:1px solid #4a3a14;background:rgba(255,176,0,.06);border-radius:12px;padding:14px 16px;text-align:left}
+  .ceremony-head{font-size:15px;color:var(--amber);font-weight:700;margin-bottom:6px}
+  .ceremony p{font-size:14px;margin:4px 0}
   .classboard{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);text-align:left}
   .cb-title{font-weight:700;margin-bottom:8px}
   .cb-row{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;flex-wrap:wrap}
@@ -249,6 +252,12 @@
       <div class="seasonline" id="seasonLine"></div>
     </div>
 
+    <div class="ceremony" id="ceremonyPanel">
+      <div class="ceremony-head">🏅 Next layer ceremony — Clay Belt · 500 m</div>
+      <p>When the shared depth crosses 500 m, every miner who has claimed at least once before the crossing is recorded in the <b>Clay Belt witness roll</b> — a permanent honour roll for that layer. <span id="witnessLine">Counting the crew's claims…</span></p>
+      <p class="fine">No reward is promised — the roll itself is the honour. Claim once before we cross, and your handle is on it forever.</p>
+    </div>
+
     <div class="cta">
       <button class="btn-wallet" id="btnConnect">Connect wallet</button>
       <button class="btn-mint" id="btnMint" disabled>Mint my miner — free</button>
@@ -322,6 +331,13 @@
   </section>
 
   <section>
+    <div class="kicker">Honour roll</div>
+    <h2>Layer <span class="a">witnesses</span></h2>
+    <p class="lead">Each depth layer keeps a roll of the miners who were already digging when the crew crossed into it. The first roll opens at the Clay Belt, 500 m. Claim at least once before the crossing and your handle is written into that layer's history — provable on-chain, kept forever.</p>
+    <div id="witnessRoll"><p style="color:var(--mut);font-size:14px">The Clay Belt roll is still open — the crossing has not happened yet. Every claim before it counts.</p></div>
+  </section>
+
+  <section>
     <div class="kicker">Portraits</div>
     <h2>The <span class="a">Crew</span></h2>
     <p class="lead">The most recent miners to join the descent — one portrait per minted token, traits drawn from its on-chain seed. Click any portrait to view it full size. Portraits evolve with their holder's level — the longer the streak, the brighter the frame.</p>
@@ -371,6 +387,7 @@
     <details><summary>What do holders receive?</summary><p>SHARD points, levels, and Founder Miner status for Season 1. SHARD is an in-game points record, not a token: it is non-transferable, has no price, and is never promised to become one. No airdrop or monetary reward is promised.</p></details>
     <details><summary>When does Season 1 end?</summary><p>Season 1, The First Descent, is open now. Minting runs until the 3,333 supply is gone, and daily claiming continues after that. The shared goal is the 10,000 m depth target — reached together, whenever the crew gets there.</p></details>
     <details><summary>Can I lose my SHARD or my streak?</summary><p>SHARD never decreases and is never burned. A streak resets only if you miss more than the 48-hour grace window between claims — and even then, your SHARD and level stay exactly where they were.</p></details>
+    <details><summary>What is a layer witness?</summary><p>When the crew's shared depth crosses into a new layer (500 m, 1,000 m, and beyond), every wallet that has claimed at least once before the crossing is recorded in that layer's witness roll on this page. It is an honour roll, not a reward — nothing is promised or paid for being on it.</p></details>
   </section>
 
   <section>
@@ -650,6 +667,12 @@ async function loadChain(){
     // Miner Card data (per wallet; lowest held token = portrait)
     window.__cardData = {};
     for (const r of rows) window.__cardData[r.w] = {handle: r.handle, cls: r.cls, shard: r.shard, level: r.level, streak: r.streak, tokenId: Math.min(...holders.get(r.w))};
+    // Layer ceremony — miners who have claimed at least once are witnesses-in-waiting for the next layer
+    const wl = document.getElementById("witnessLine");
+    if (wl) {
+      const nw = rows.filter(r => r.shard > 0 || r.streak > 0).length;
+      wl.textContent = nw + " miner" + (nw === 1 ? " has" : "s have") + " claimed so far and would be recorded as Clay Belt Witnesses if we crossed today — the roll stays open until the crossing.";
+    }
     // Class rivalry — Season 1 totals per class, from the crew rows above
     const boardEl = document.getElementById("classBoard");
     if (boardEl && rows.length) {

@@ -43,6 +43,12 @@ Report to your owner when any of these is true:
 
 On the project website, a miner's portrait frame evolves with the owner's on-chain level (`levelOf`): level 3+ shows a level badge and an amber edge, level 5+ a glowing amber frame, level 7+ a brighter glow, level 10 a teal ascended frame. This is presentation only — it changes nothing on-chain — but it is a visible status marker that other holders and their agents can see in the gallery. The level itself is earned only by claiming and holding a streak, so the frame cannot be bought or faked.
 
+## Layer ceremonies (witness rolls)
+
+Each depth layer keeps a witness roll. When the crew's shared depth (totalDepth) crosses a layer milestone (100 / 500 / 1,000 / 2,500 / 5,000 / 10,000 m), every wallet that has claimed at least once before the crossing is recorded by handle in that layer's roll on the website — permanently. It is an honour roll only: no reward is promised for being on it.
+
+Why this matters for your owner: most holders have never claimed at all, so they would miss the roll. If your owner holds a Miner and has never claimed (shardOf == 0 and streakOf == 0), tell them plainly: one claim before the next crossing — the Clay Belt at 500 m — puts their handle in that layer's history forever. Every claim also digs +4 m of shared depth (+8 m on their class day), so claiming is what moves the crossing closer.
+
 ## Honesty rules for your reports
 
 - SHARD is an in-game points record. It is not a token, has no price, and must never be described as earnings, income, or an investment.
