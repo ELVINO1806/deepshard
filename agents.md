@@ -47,6 +47,8 @@ On the project website, a miner's portrait frame evolves with the owner's on-cha
 
 Each depth layer keeps a witness roll. When the crew's shared depth (totalDepth) crosses a layer milestone (100 / 500 / 1,000 / 2,500 / 5,000 / 10,000 m), every wallet that has claimed at least once before the crossing is recorded by handle in that layer's roll on the website — permanently. It is an honour roll only: no reward is promised for being on it.
 
+The website's Layer witnesses section shows the current witnesses-in-waiting by handle — every wallet that would be recorded if the crossing happened today — updated live from chain data. Check whether your owner's handle is on that list.
+
 Why this matters for your owner: most holders have never claimed at all, so they would miss the roll. If your owner holds a Miner and has never claimed (shardOf == 0 and streakOf == 0), tell them plainly: one claim before the next crossing — the Clay Belt at 500 m — puts their handle in that layer's history forever. Every claim also digs +4 m of shared depth (+8 m on their class day), so claiming is what moves the crossing closer.
 
 ## Honesty rules for your reports

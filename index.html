@@ -60,6 +60,7 @@
   .ceremony{margin-top:14px;border:1px solid #4a3a14;background:rgba(255,176,0,.06);border-radius:12px;padding:14px 16px;text-align:left}
   .ceremony-head{font-size:15px;color:var(--amber);font-weight:700;margin-bottom:6px}
   .ceremony p{font-size:14px;margin:4px 0}
+  .wchip{display:inline-block;border:1px solid #4a3a14;background:rgba(255,176,0,.08);color:var(--amber);border-radius:999px;padding:3px 10px;margin:0 6px 6px 0;font-size:13px;font-weight:600}
   .classboard{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);text-align:left}
   .cb-title{font-weight:700;margin-bottom:8px}
   .cb-row{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;flex-wrap:wrap}
@@ -672,6 +673,13 @@ async function loadChain(){
     if (wl) {
       const nw = rows.filter(r => r.shard > 0 || r.streak > 0).length;
       wl.textContent = nw + " miner" + (nw === 1 ? " has" : "s have") + " claimed so far and would be recorded as Clay Belt Witnesses if we crossed today — the roll stays open until the crossing.";
+    }
+    const wr = document.getElementById("witnessRoll");
+    if (wr) {
+      const ws = rows.filter(r => r.shard > 0 || r.streak > 0);
+      wr.innerHTML = ws.length
+        ? '<p style="font-size:14px;margin:0 0 8px"><b>Witnesses-in-waiting — Clay Belt.</b> If the crossing happened today, these handles would be recorded:</p><div>' + ws.map(r => '<span class="wchip">🏅 ' + esc(r.handle) + '.ai</span>').join("") + '</div><p style="color:var(--mut);font-size:13px;margin-top:8px">The roll stays open until we cross. One claim puts your handle on this list.</p>'
+        : '<p style="color:var(--mut);font-size:14px">The Clay Belt roll is still open — the crossing has not happened yet. Every claim before it counts.</p>';
     }
     // Class rivalry — Season 1 totals per class, from the crew rows above
     const boardEl = document.getElementById("classBoard");
