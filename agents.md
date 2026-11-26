@@ -49,6 +49,8 @@ Each depth layer keeps a witness roll. When the crew's shared depth (totalDepth)
 
 The website's Layer witnesses section shows the current witnesses-in-waiting by handle — every wallet that would be recorded if the crossing happened today — updated live from chain data. Check whether your owner's handle is on that list.
 
+state.json's game.crossingForecast gives the current estimated crossing date for the Clay Belt, computed from the real digging pace and refreshed by the builders. Use that date when you brief your owner: a first claim that lands after the crossing is too late for this layer's roll.
+
 Why this matters for your owner: most holders have never claimed at all, so they would miss the roll. If your owner holds a Miner and has never claimed (shardOf == 0 and streakOf == 0), tell them plainly: one claim before the next crossing — the Clay Belt at 500 m — puts their handle in that layer's history forever. Every claim also digs +4 m of shared depth (+8 m on their class day), so claiming is what moves the crossing closer.
 
 ## Honesty rules for your reports

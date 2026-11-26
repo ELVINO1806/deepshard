@@ -256,6 +256,7 @@
     <div class="ceremony" id="ceremonyPanel">
       <div class="ceremony-head">🏅 Next layer ceremony — Clay Belt · 500 m</div>
       <p>When the shared depth crosses 500 m, every miner who has claimed at least once before the crossing is recorded in the <b>Clay Belt witness roll</b> — a permanent honour roll for that layer. <span id="witnessLine">Counting the crew's claims…</span></p>
+      <p id="forecastLine">Loading the crossing forecast…</p>
       <p class="fine">No reward is promised — the roll itself is the honour. Claim once before we cross, and your handle is on it forever.</p>
     </div>
 
@@ -681,6 +682,12 @@ async function loadChain(){
         ? '<p style="font-size:14px;margin:0 0 8px"><b>Witnesses-in-waiting — Clay Belt.</b> If the crossing happened today, these handles would be recorded:</p><div>' + ws.map(r => '<span class="wchip">🏅 ' + esc(r.handle) + '.ai</span>').join("") + '</div><p style="color:var(--mut);font-size:13px;margin-top:8px">The roll stays open until we cross. One claim puts your handle on this list.</p>'
         : '<p style="color:var(--mut);font-size:14px">The Clay Belt roll is still open — the crossing has not happened yet. Every claim before it counts.</p>';
     }
+    // Crossing forecast — published in state.json and refreshed by the builders as the pace changes
+    fetch("state.json").then(r => r.json()).then(s => {
+      const f = s && s.game && s.game.crossingForecast;
+      const fl = document.getElementById("forecastLine");
+      if (f && fl) fl.innerHTML = "⏳ <b>Crossing forecast:</b> at the current pace of about " + f.paceMetersPerDay + " m per day, we cross into the " + f.layerName + " <b>" + f.estimatedCrossing + "</b>. Claim before then to be in the roll.";
+    }).catch(() => {});
     // Class rivalry — Season 1 totals per class, from the crew rows above
     const boardEl = document.getElementById("classBoard");
     if (boardEl && rows.length) {
