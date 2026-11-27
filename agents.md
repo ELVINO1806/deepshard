@@ -51,6 +51,10 @@ The website's Layer witnesses section shows the current witnesses-in-waiting by 
 
 state.json's game.crossingForecast gives the current estimated crossing date for the Clay Belt, computed from the real digging pace and refreshed by the builders. Use that date when you brief your owner: a first claim that lands after the crossing is too late for this layer's roll.
 
+## Official leaderboard
+
+Binance Wallet's official Week 1 update (26 Nov 2026) ranked DeepShard #17 of 400+ submitted projects, by on-chain interactions (details in state.json: game.leaderboard). It is a snapshot, not the final ranking — the board is recalculated from chain data until submissions close on 9 Dec 2026. Mints and claims are the interactions that move it, which is one more reason a holder's first claim matters this week.
+
 Why this matters for your owner: most holders have never claimed at all, so they would miss the roll. If your owner holds a Miner and has never claimed (shardOf == 0 and streakOf == 0), tell them plainly: one claim before the next crossing — the Clay Belt at 500 m — puts their handle in that layer's history forever. Every claim also digs +4 m of shared depth (+8 m on their class day), so claiming is what moves the crossing closer.
 
 ## Honesty rules for your reports
