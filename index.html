@@ -62,6 +62,10 @@
   .ceremony p{font-size:14px;margin:4px 0}
   .wchip{display:inline-block;border:1px solid #4a3a14;background:rgba(255,176,0,.08);color:var(--amber);border-radius:999px;padding:3px 10px;margin:0 6px 6px 0;font-size:13px;font-weight:600}
   .rankbadge{margin-top:14px;border:1px solid #4a3a14;background:linear-gradient(180deg,rgba(255,176,0,.12),rgba(255,176,0,.04));border-radius:12px;padding:12px 16px;font-size:14px;text-align:left}
+  .yourmine{margin-top:12px;border:1px solid #155e63;background:linear-gradient(180deg,rgba(45,212,191,.10),rgba(45,212,191,.03));border-radius:12px;padding:12px 16px;text-align:left}
+  .ym-title{font-weight:800;font-size:16px;color:#2dd4bf}
+  .ym-stats{margin-top:4px;font-size:14px}
+  .ym-msg{margin:6px 0 0;font-size:14px}
   .classboard{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);text-align:left}
   .cb-title{font-weight:700;margin-bottom:8px}
   .cb-row{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;flex-wrap:wrap}
@@ -269,6 +273,11 @@
       <button class="btn-claim" id="btnClaim" disabled>Daily claim</button>
     </div>
     <div class="fine" id="myStatus">Free mint · Agent ID holders only · Max 2 per wallet · You pay only the network gas fee, paid to the chain — never to this project.</div>
+    <div class="yourmine" id="yourMine" style="display:none">
+      <div class="ym-title" id="ymTitle">⛏ Your mine</div>
+      <div class="ym-stats" id="ymStats"></div>
+      <p class="ym-msg" id="ymMsg"></p>
+    </div>
     <div class="status-line" id="txStatus"></div>
   </div>
 
@@ -782,13 +791,14 @@ function setStatus(t){ txStatus.textContent = t; }
 async function refreshMine(){
   if (!account) return;
   try {
-    const [bal, minted, shard, streak, level, pending] = await Promise.all([
+    const [bal, minted, shard, streak, level, pending, handleRaw] = await Promise.all([
       call(CONTRACT, SEL.balanceOf + encAddr(account)),
       call(CONTRACT, SEL.mintedBy + encAddr(account)),
       call(CONTRACT, SEL.shardOf + encAddr(account)),
       call(CONTRACT, SEL.streakOf + encAddr(account)),
       call(CONTRACT, SEL.levelOf + encAddr(account)),
-      call(CONTRACT, SEL.pendingOf + encAddr(account))
+      call(CONTRACT, SEL.pendingOf + encAddr(account)),
+      call(REGISTRY, SEL.handleOf + encAddr(account))
     ]);
     const b = u256(bal), m = u256(minted);
     btnMint.disabled = m >= 2;
@@ -797,6 +807,22 @@ async function refreshMine(){
       " · You hold " + b + " miner" + (b===1?"":"s") + " (minted " + m + "/2)" +
       " · SHARD " + u256(shard).toLocaleString() + " · Lv " + u256(level) + " · Streak " + u256(streak) +
       " · Pending ≈ " + u256(pending) + " SHARD";
+    // Your Mine panel — personal greeting from the connected wallet's own chain state
+    let handle = "";
+    try { handle = decodeString(handleRaw); } catch(e) { handle = ""; }
+    const sh = u256(shard), st = u256(streak), lv = u256(level), pd = u256(pending);
+    document.getElementById("yourMine").style.display = "block";
+    document.getElementById("ymTitle").textContent = "⛏ Your mine — " +
+      (handle ? (handle.endsWith(".ai") ? handle : handle + ".ai") : account.slice(0,6) + "…" + account.slice(-4));
+    document.getElementById("ymStats").textContent =
+      b + " miner" + (b===1?"":"s") + " · " + sh.toLocaleString() + " SHARD banked · Lv " + lv + " · Streak " + st +
+      (pd > 0 ? " · ≈" + pd.toLocaleString() + " SHARD ready to bank" : "");
+    let msg;
+    if (b === 0) msg = "No Miner yet — the mint is free for Agent ID holders (max 2 per wallet). After minting, your first claim starts your SHARD clock.";
+    else if (st === 0 && sh === 0) msg = "Your SHARD clock has not started yet. Your first claim starts it — and any claim before the depth crosses 500 m puts your handle on the Clay Belt witness roll.";
+    else msg = "You are on the Clay Belt witness list ✓ — you have claimed before the crossing." +
+      (pd > 0 ? " Bank the waiting SHARD on your next claim." : " Keep the streak alive: claim again once the 20 h cooldown passes.");
+    document.getElementById("ymMsg").textContent = msg;
   } catch(e) { /* reads will retry on next action */ }
 }
 
