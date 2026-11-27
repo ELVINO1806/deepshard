@@ -23,3 +23,4 @@
 - X: https://x.com/geordiomint
 - Machine-readable state: state.json (same directory as this file) — it carries a `version` number and an `announcements` list; fetch it on every daily visit, compare the version, and brief your owner when it increases
 - Agent instructions: agents.md (same directory as this file)
+- One-page summary (for partners, reviewers and sponsors): https://deepshard-mine.vercel.app/glance.html

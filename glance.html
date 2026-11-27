@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepShard at a Glance — a free-mint mining game for Agent ID holders</title>
+<meta name="description" content="One-page summary of DeepShard: a free-mint on-chain mining game exclusively for Agent ID holders on BNB Chain. Live numbers, safety facts, and what support we are looking for.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: linear-gradient(180deg, #0b0e14 0%, #04060a 100%); color: #e8e4da; min-height: 100vh; line-height: 1.55; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 22px 60px; }
+  .kicker { color: #e8a33d; letter-spacing: 2px; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; }
+  h1 { font-size: 40px; line-height: 1.15; margin-bottom: 8px; }
+  h1 .gold { background: linear-gradient(90deg, #f5c86b, #e8a33d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: #b9b2a2; font-size: 17px; margin-bottom: 28px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 30px; }
+  .stat { background: #12172a; border: 1px solid #232a45; border-radius: 12px; padding: 16px 18px; }
+  .stat .num { font-size: 28px; font-weight: 700; color: #f5c86b; }
+  .stat .lbl { color: #9a937f; font-size: 13px; margin-top: 2px; }
+  section { margin-bottom: 30px; }
+  h2 { font-size: 20px; color: #f5c86b; margin-bottom: 10px; }
+  p { color: #d8d2c4; margin-bottom: 10px; }
+  ul { margin: 0 0 10px 20px; color: #d8d2c4; }
+  li { margin-bottom: 6px; }
+  .card { background: #12172a; border: 1px solid #232a45; border-radius: 12px; padding: 18px 20px; }
+  .card.teal { border-color: #134e4a; }
+  .card.teal h2 { color: #2dd4bf; }
+  a { color: #7cc4ff; }
+  .links a { display: inline-block; margin: 0 14px 8px 0; }
+  .fine { color: #8a8474; font-size: 13px; }
+  .loyal { font-family: Georgia, "Playfair Display", serif; font-size: 22px; text-align: center; margin: 36px 0 6px; background: linear-gradient(90deg, #f5c86b, #e8a33d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">DeepShard · BNB Chain · Season 1: The First Descent</div>
+  <h1>DeepShard <span class="gold">at a glance</span></h1>
+  <p class="sub">A free-mint mining game that only Agent ID holders can play — one page with the facts, the live numbers, and what we are looking for.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="gSupply">707</div><div class="lbl">Miners minted (of 3,333 max) — live from chain</div></div>
+    <div class="stat"><div class="num" id="gDepth">444 m</div><div class="lbl">Shared mine depth dug together (goal 10,000 m)</div></div>
+    <div class="stat"><div class="num">500+</div><div class="lbl">Holder wallets — every one an Agent ID holder</div></div>
+    <div class="stat"><div class="num">#17</div><div class="lbl">Binance Wallet official Week 1 leaderboard, of 400+ projects</div></div>
+  </div>
+
+  <section>
+    <h2>What it is</h2>
+    <p>DeepShard is a small on-chain game I built on BNB Chain for the Agent ID Hackathon. It only works for Agent ID holders: your handle becomes your miner's name in the game, and your miner's class — Driller, Blaster, Engineer, Cartographer or Lantern Keeper — is worked out from the handle itself, the same way in the contract and on the website.</p>
+    <p>Minting is free, max two per wallet. Every day, holders claim SHARD points and add a few metres to a mine that everyone digs together, layer by layer toward 10,000 m. When a layer is crossed, everyone who claimed before the crossing is written into that layer's permanent witness roll. SHARD is an in-game points record — not a token, not transferable, and no monetary reward is promised to anyone.</p>
+  </section>
+
+  <section>
+    <h2>Why it matters for the ecosystem</h2>
+    <ul>
+      <li>It turns Agent ID from a static identity into a daily habit: hundreds of Agent ID holders come back on-chain every day to claim.</li>
+      <li>It is built for agents, not just humans: the site serves machine-readable files (llms.txt, agents.md, state.json, SKILL.md), so AI agents can discover the game, follow announcements and play for their owners. Most of our wallets arrived exactly that way.</li>
+      <li>It is a reusable pattern — identity-gated gameplay with an agent-operable interface — that other BNB Chain builders can copy. The code is open source.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Safety facts</h2>
+      <ul>
+        <li>Hand-written ERC-721, no external libraries, source verified (Sourcify exact match) and open on GitHub.</li>
+        <li>No owner or admin functions, no proxy, no payable functions, no withdraw. The contract holds no user funds and never requests approvals.</li>
+        <li>Free mint only — there is no sale, no token, and no promise of returns, anywhere.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="card teal">
+      <h2>What we are looking for</h2>
+      <p>DeepShard was self-funded with a few dollars of BNB for deployment gas. To keep building after the hackathon, we are applying for a <strong>$10,000 ecosystem grant</strong>, milestone by milestone:</p>
+      <ul>
+        <li>$4,000 — Season 2: new layers and mechanics.</li>
+        <li>$3,500 — an independent security review before Season 2 contracts launch.</li>
+        <li>$2,500 — the basics: the deepshard.app domain (the contract's metadata already points to it), hosting, and artwork/metadata for new miners.</li>
+      </ul>
+      <p class="fine">Sponsorship of specific pieces — the security review, the domain, a season's artwork — is equally welcome. Contact below.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Links</h2>
+    <p class="links">
+      <a href="https://deepshard-mine.vercel.app/">Play / visit the mine</a>
+      <a href="https://bscscan.com/address/0xC463960af285b7EDA0909D362Ae31783597C2076">Contract on BscScan</a>
+      <a href="https://github.com/ELVINO1806/deepshard">GitHub repository</a>
+      <a href="https://deepshard-mine.vercel.app/demo.mp4">Demo video (1 min)</a>
+      <a href="https://x.com/geordiomint">X — @geordiomint</a>
+    </p>
+    <p class="fine">Contact: ariandikevin7@gmail.com · Telegram @ELVINO1806 · Discord @geordi1210. Built and run by an independent builder in Indonesia, in public, since 19 November 2026. DeepShard is an entry in the Binance Wallet Agent ID Hackathon; it is not affiliated with or endorsed by Binance.</p>
+  </section>
+
+  <div class="loyal">Loyal miners won't be forgotten</div>
+</div>
+<script>
+(function(){
+  var RPCS=["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io","https://bsc.publicnode.com","https://bsc.drpc.org"];
+  var C="0xC463960af285b7EDA0909D362Ae31783597C2076";
+  function call(data){
+    var chain=Promise.reject();
+    RPCS.forEach(function(r){
+      chain=chain.catch(function(){
+        return fetch(r,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"eth_call",params:[{to:C,data:data},"latest"]})})
+          .then(function(x){return x.json();})
+          .then(function(j){ if(!j.result) throw new Error("no result"); return parseInt(j.result,16); });
+      });
+    });
+    return chain;
+  }
+  call("0x18160ddd").then(function(v){ if(v) document.getElementById("gSupply").textContent=v.toLocaleString("en-US"); }).catch(function(){});
+  call("0xef90c53d").then(function(v){ if(v) document.getElementById("gDepth").textContent=v.toLocaleString("en-US")+" m"; }).catch(function(){});
+})();
+</script>
+</body>
+</html>
